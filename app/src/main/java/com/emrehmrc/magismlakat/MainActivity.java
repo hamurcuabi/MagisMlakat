@@ -1,22 +1,30 @@
 package com.emrehmrc.magismlakat;
 
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.ProgressBar;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.emrehmrc.magismlakat.adapter.ProductRecyclerAdapter;
 import com.emrehmrc.magismlakat.api.ApiClient;
 import com.emrehmrc.magismlakat.api.JsonApi;
+import com.emrehmrc.magismlakat.fragment.ProductReadyToBuyFragment;
+import com.emrehmrc.magismlakat.helper.SingletonProduct;
 import com.emrehmrc.magismlakat.model.ProductModel;
 import com.emrehmrc.magismlakat.model.Products;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -31,20 +39,23 @@ public class MainActivity extends AppCompatActivity {
     private ProductRecyclerAdapter adapter;
     private LinearLayoutManager layoutManager;
     private ProductModel productModel;
-    private List<Products> mainList;
-    private boolean isScrolling = false;
-    private int currentItems, totalItems, scrollOutItems;
+    private boolean isEnable = true;
     private ProductModel responseModel;
-    private int counter=2;
-    private ProgressBar progressBar;
+    private int counter = 3;
+    private NestedScrollView nestedScrollView;
+    private Button btn_buy;
+    private EditText edt_amoun;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        progressBar=findViewById(R.id.progress);
-        progressBar.setVisibility(View.GONE);
+
         rcv_products = findViewById(R.id.rcycler_product);
+        nestedScrollView = findViewById(R.id.nested);
+        btn_buy=findViewById(R.id.btn_buy);
+        edt_amoun=findViewById(R.id.edt_amount);
+
         layoutManager = new LinearLayoutManager(this);
         rcv_products.setLayoutManager(layoutManager);
         //
@@ -58,7 +69,12 @@ public class MainActivity extends AppCompatActivity {
 
                 productModel = new ProductModel();
                 responseModel = response.body();
-                productModel.setProducts(responseModel.getProducts().subList(0, 10));
+                List<Products> temp=new ArrayList<>();
+                for(int i=0;i<10;i++){
+                    temp.add(responseModel.getProducts().get(i));
+                }
+
+                productModel.setProducts(temp);
                 adapter = new ProductRecyclerAdapter(getApplicationContext(), productModel);
                 rcv_products.setAdapter(adapter);
 
@@ -68,48 +84,71 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ProductModel> call, Throwable t) {
                 Log.d(TAG, "onFailure: " + t.getMessage());
+                Toast.makeText(getApplicationContext(),t.getMessage(),Toast.LENGTH_LONG).show();
             }
         });
 
-
-        rcv_products.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    isScrolling = true;
-                }
-            }
+        nestedScrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
 
             @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                currentItems = layoutManager.getChildCount();
-                totalItems = layoutManager.getItemCount();
-                scrollOutItems = layoutManager.findFirstVisibleItemPosition();
-                if (isScrolling && (currentItems + scrollOutItems == totalItems)) {
+            public void onScrollChanged() {
+                View view = nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1);
 
-                    //data fetch
-                    isScrolling = false;
+                int diff = (view.getBottom() - (nestedScrollView.getHeight() + nestedScrollView
+                        .getScrollY()));
+
+                if (diff == 0 && isEnable) {
                     counter++;
+                    isEnable=false;
                     DataFetch();
+
+
                 }
             }
         });
+
+        Toast.makeText(this,"Fetching Data started",Toast.LENGTH_LONG).show();
+        btn_buy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(TextUtils.isEmpty(edt_amoun.getText().toString()) || SingletonProduct
+                        .getInstance().getBuy_type()==0){
+                    Toast.makeText(getApplicationContext(),"Amount Can not be empty!",Toast
+                            .LENGTH_LONG).show();
+                }
+                else {
+                    SingletonProduct.getInstance().setAmount(Integer.parseInt(edt_amoun.getText()
+                            .toString()));
+                    FragmentManager fm = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                    fragmentTransaction.replace(R.id.relative, ProductReadyToBuyFragment.newInstance());
+                    fragmentTransaction.commit();
+
+
+                }
+            }
+        });
+
     }
 
     private void DataFetch() {
-        Log.d(TAG, "DataFetch: ");
-        Toast.makeText(getApplicationContext(),"Data Fetched",Toast.LENGTH_SHORT).show();
-        progressBar.setVisibility(View.VISIBLE);
-        if((counter*5)<=responseModel.getProducts().size()){
-            productModel.setProducts(responseModel.getProducts().subList(0, 5*counter));
+        Toast.makeText(this,"Fetching Data!",Toast.LENGTH_LONG).show();
+        int count=productModel.getProducts().size();
+        Log.d(TAG, "productModel: "+count);
+        Log.d(TAG, "responseModel: "+responseModel.getProducts().size());
+        for(int i=count;i<=count+5;i++){
+            if(responseModel.getProducts().size()>=i)
+            productModel.getProducts().add(i,responseModel.getProducts().get(i));
+            Log.d(TAG, "DataFetch: "+responseModel.getProducts().get(i).toString());
+            adapter.notifyItemInserted(i);
+
+
         }
-        else {
-            productModel.setProducts(responseModel.getProducts());
-        }
-        adapter.notifyDataSetChanged();
-        progressBar.setVisibility(View.GONE);
+
+
+        isEnable = true;
+
+
 
     }
 

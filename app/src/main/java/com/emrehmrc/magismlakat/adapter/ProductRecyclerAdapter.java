@@ -32,11 +32,11 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
 
     public ProductRecyclerAdapter(Context mContext, ProductModel model) {
         this.mContext = mContext;
-        for (int i = 0; i < model.getProducts().size(); i++) {
-            if (!Boolean.parseBoolean(model.getProducts().get(i).getIsActive())) {
-                model.getProducts().remove(i);
-            }
-        }
+//        for (int i = 0; i < model.getProducts().size(); i++) {
+//            if (!Boolean.parseBoolean(model.getProducts().get(i).getIsActive())) {
+//                model.getProducts().remove(i);
+//            }
+//        }
         this.model = model;
 
 
@@ -120,6 +120,7 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
                     selectedPosition = myViewHolder.getAdapterPosition();
 
 
+
                 } else {
                     SingletonProduct.getInstance().setBuy_type(0);
                     SingletonProduct.getInstance().setProducts(null);
@@ -165,11 +166,9 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
             }
         });
 
-        myViewHolder.cb_price_one.setChecked(selectedPosition == i);
-        myViewHolder.cb_price_two.setChecked(selectedPosition == i);
-        myViewHolder.cb_price_three.setChecked(selectedPosition == i);
 
-        Log.d(TAG, "onBindViewHolder: " + selectedPosition + "--" + i);
+
+        Log.d(TAG, "onBindViewHolder: " + selectedPosition + "-" + i);
 
     }
 
