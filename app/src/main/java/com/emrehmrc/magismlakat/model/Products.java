@@ -1,5 +1,7 @@
 package com.emrehmrc.magismlakat.model;
 
+import java.util.List;
+
 public class Products
 {
     private String picture;
@@ -10,7 +12,7 @@ public class Products
 
     private String _id;
 
-    private Prices[] prices;
+    private List<Prices> prices;
 
     private String available;
 
@@ -54,12 +56,12 @@ public class Products
         this._id = _id;
     }
 
-    public Prices[] getPrices ()
+    public List<Prices> getPrices ()
     {
         return prices;
     }
 
-    public void setPrices (Prices[] prices)
+    public void setPrices (List<Prices> prices)
     {
         this.prices = prices;
     }

@@ -1,16 +1,18 @@
 package com.emrehmrc.magismlakat.model;
 
 
+import java.util.List;
+
 public class ProductModel
 {
-    private Products[] products;
+    private List<Products> products;
 
-    public Products[] getProducts ()
+    public List<Products> getProducts ()
     {
         return products;
     }
 
-    public void setProducts (Products[] products)
+    public void setProducts (List<Products> products)
     {
         this.products = products;
     }

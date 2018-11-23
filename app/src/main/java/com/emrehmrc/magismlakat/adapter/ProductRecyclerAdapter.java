@@ -3,33 +3,42 @@ package com.emrehmrc.magismlakat.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.emrehmrc.magismlakat.R;
+import com.emrehmrc.magismlakat.helper.SingletonProduct;
 import com.emrehmrc.magismlakat.model.Prices;
 import com.emrehmrc.magismlakat.model.ProductModel;
 import com.emrehmrc.magismlakat.model.Products;
 import com.squareup.picasso.Picasso;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecyclerAdapter
         .MyViewHolder> {
+    private static final String TAG = "ProductRecyclerAdapter";
 
     private Context mContext;
     private ProductModel model;
-    private List<Products> productsList;
+    private int selectedPosition = -1;// no selection by default
+
 
     public ProductRecyclerAdapter(Context mContext, ProductModel model) {
         this.mContext = mContext;
+        for (int i = 0; i < model.getProducts().size(); i++) {
+            if (!Boolean.parseBoolean(model.getProducts().get(i).getIsActive())) {
+                model.getProducts().remove(i);
+            }
+        }
         this.model = model;
-        this.productsList = Arrays.asList(model.getProducts());
+
 
     }
 
@@ -42,9 +51,9 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int i) {
+    public void onBindViewHolder(@NonNull final MyViewHolder myViewHolder, final int i) {
 
-        Products current = productsList.get(i);
+        final Products current = model.getProducts().get(i);
         Picasso.get()
                 .load(current.getPicture())
                 .resize(64, 64)
@@ -53,7 +62,7 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
         myViewHolder.txt_title.setText(current.getTitle());
         myViewHolder.txt_avaible.setText(current.getAvailable());
         //Prices
-        List<Prices> current_prices = Arrays.asList(current.getPrices());
+        List<Prices> current_prices = current.getPrices();
         if (current_prices.size() == 3) {
             String prices_string_format_1 = "1 " + current_prices.get(0)
                     .getUnit() + "->" + current_prices.get(0).getPrice() + current_prices.get(0)
@@ -99,13 +108,74 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
             myViewHolder.txt_price_three.setVisibility(View.GONE);
             myViewHolder.cb_price_three.setVisibility(View.GONE);
         }
+        //cb_1
+        myViewHolder.cb_price_one.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    myViewHolder.cb_price_two.setChecked(false);
+                    myViewHolder.cb_price_three.setChecked(false);
+                    SingletonProduct.getInstance().setBuy_type(1);
+                    SingletonProduct.getInstance().setProducts(current);
+                    selectedPosition = myViewHolder.getAdapterPosition();
 
+
+                } else {
+                    SingletonProduct.getInstance().setBuy_type(0);
+                    SingletonProduct.getInstance().setProducts(null);
+
+                }
+
+
+            }
+        });
+        //cb_2
+        myViewHolder.cb_price_two.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    myViewHolder.cb_price_one.setChecked(false);
+                    myViewHolder.cb_price_three.setChecked(false);
+                    SingletonProduct.getInstance().setBuy_type(2);
+                    SingletonProduct.getInstance().setProducts(current);
+                    selectedPosition = myViewHolder.getAdapterPosition();
+                } else {
+                    SingletonProduct.getInstance().setBuy_type(0);
+                    SingletonProduct.getInstance().setProducts(null);
+
+                }
+            }
+        });
+        //cb_3
+        myViewHolder.cb_price_three.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    myViewHolder.cb_price_one.setChecked(false);
+                    myViewHolder.cb_price_two.setChecked(false);
+                    SingletonProduct.getInstance().setBuy_type(3);
+                    SingletonProduct.getInstance().setProducts(current);
+                    selectedPosition = myViewHolder.getAdapterPosition();
+
+                } else {
+                    SingletonProduct.getInstance().setBuy_type(0);
+                    SingletonProduct.getInstance().setProducts(null);
+
+                }
+            }
+        });
+
+        myViewHolder.cb_price_one.setChecked(selectedPosition == i);
+        myViewHolder.cb_price_two.setChecked(selectedPosition == i);
+        myViewHolder.cb_price_three.setChecked(selectedPosition == i);
+
+        Log.d(TAG, "onBindViewHolder: " + selectedPosition + "--" + i);
 
     }
 
     @Override
     public int getItemCount() {
-        return model.getProducts().length;
+        return model.getProducts().size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
