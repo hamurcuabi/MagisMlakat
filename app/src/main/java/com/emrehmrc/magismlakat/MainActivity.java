@@ -1,8 +1,8 @@
 package com.emrehmrc.magismlakat;
 
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.os.Bundle;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,7 +24,6 @@ import com.emrehmrc.magismlakat.model.ProductModel;
 import com.emrehmrc.magismlakat.model.Products;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -53,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
         rcv_products = findViewById(R.id.rcycler_product);
         nestedScrollView = findViewById(R.id.nested);
-        btn_buy=findViewById(R.id.btn_buy);
-        edt_amoun=findViewById(R.id.edt_amount);
+        btn_buy = findViewById(R.id.btn_buy);
+        edt_amoun = findViewById(R.id.edt_amount);
 
         layoutManager = new LinearLayoutManager(this);
         rcv_products.setLayoutManager(layoutManager);
@@ -69,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
                 productModel = new ProductModel();
                 responseModel = response.body();
-                List<Products> temp=new ArrayList<>();
-                for(int i=0;i<10;i++){
+                List<Products> temp = new ArrayList<>();
+                for (int i = 0; i < 10; i++) {
                     temp.add(responseModel.getProducts().get(i));
                 }
 
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ProductModel> call, Throwable t) {
                 Log.d(TAG, "onFailure: " + t.getMessage());
-                Toast.makeText(getApplicationContext(),t.getMessage(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -99,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (diff == 0 && isEnable) {
                     counter++;
-                    isEnable=false;
+                    isEnable = false;
                     DataFetch();
 
 
@@ -107,16 +106,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Toast.makeText(this,"Fetching Data started",Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Fetching Data started", Toast.LENGTH_LONG).show();
         btn_buy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(TextUtils.isEmpty(edt_amoun.getText().toString()) || SingletonProduct
-                        .getInstance().getBuy_type()==0){
-                    Toast.makeText(getApplicationContext(),"Amount Can not be empty!",Toast
+                if (TextUtils.isEmpty(edt_amoun.getText().toString())) {
+                    Toast.makeText(getApplicationContext(), "Amount Can not be empty!", Toast
                             .LENGTH_LONG).show();
-                }
-                else {
+                } else if (SingletonProduct.getInstance().getBuy_type() == 0) {
+
+                    Toast.makeText(getApplicationContext(), "Please Select an item!", Toast
+                            .LENGTH_LONG).show();
+                } else {
                     SingletonProduct.getInstance().setAmount(Integer.parseInt(edt_amoun.getText()
                             .toString()));
                     FragmentManager fm = getSupportFragmentManager();
@@ -132,14 +133,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void DataFetch() {
-        Toast.makeText(this,"Fetching Data!",Toast.LENGTH_LONG).show();
-        int count=productModel.getProducts().size();
-        Log.d(TAG, "productModel: "+count);
-        Log.d(TAG, "responseModel: "+responseModel.getProducts().size());
-        for(int i=count;i<=count+5;i++){
-            if(responseModel.getProducts().size()>=i)
-            productModel.getProducts().add(i,responseModel.getProducts().get(i));
-            Log.d(TAG, "DataFetch: "+responseModel.getProducts().get(i).toString());
+        Toast.makeText(this, "Fetching Data!", Toast.LENGTH_LONG).show();
+        int count = productModel.getProducts().size();
+        Log.d(TAG, "productModel: " + count);
+        Log.d(TAG, "responseModel: " + responseModel.getProducts().size());
+        for (int i = count; i <= count + 5; i++) {
+            if (responseModel.getProducts().size() >= i)
+                productModel.getProducts().add(i, responseModel.getProducts().get(i));
+            Log.d(TAG, "DataFetch: " + responseModel.getProducts().get(i).toString());
             adapter.notifyItemInserted(i);
 
 
@@ -147,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         isEnable = true;
-
 
 
     }

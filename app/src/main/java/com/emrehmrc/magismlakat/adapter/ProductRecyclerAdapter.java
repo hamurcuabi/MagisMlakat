@@ -90,6 +90,7 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
             myViewHolder.txt_price_two.setText(prices_string_format_2);
             myViewHolder.txt_price_three.setVisibility(View.GONE);
             myViewHolder.cb_price_three.setVisibility(View.GONE);
+            Log.d(TAG, "Visibilty");
         } else if (current_prices.size() == 1) {
             String prices_string_format_1 = "1 " + current_prices.get(0)
                     .getUnit() + "->" + current_prices.get(0).getPrice() + current_prices.get(0)
@@ -100,6 +101,7 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
             myViewHolder.cb_price_two.setVisibility(View.GONE);
             myViewHolder.txt_price_three.setVisibility(View.GONE);
             myViewHolder.cb_price_three.setVisibility(View.GONE);
+            Log.d(TAG, "Visibilty whyyy");
         } else {
             myViewHolder.txt_price_one.setVisibility(View.GONE);
             myViewHolder.cb_price_one.setVisibility(View.GONE);
@@ -117,7 +119,13 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
                     myViewHolder.cb_price_three.setChecked(false);
                     SingletonProduct.getInstance().setBuy_type(1);
                     SingletonProduct.getInstance().setProducts(current);
+                    Log.d(TAG, "selectedPosition: "+selectedPosition);
+                    if(selectedPosition!=myViewHolder.getAdapterPosition()&&selectedPosition!=-1){
+                        notifyItemChanged(selectedPosition);
+                    }
                     selectedPosition = myViewHolder.getAdapterPosition();
+                    Log.d(TAG, "myViewHolder.getAdapterPosition(): "+myViewHolder.getAdapterPosition());
+
 
 
 
@@ -139,10 +147,20 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
                     myViewHolder.cb_price_three.setChecked(false);
                     SingletonProduct.getInstance().setBuy_type(2);
                     SingletonProduct.getInstance().setProducts(current);
+                    Log.d(TAG, "selectedPosition: "+selectedPosition);
+                    if(selectedPosition!=myViewHolder.getAdapterPosition()&&selectedPosition!=-1){
+                        notifyItemChanged(selectedPosition);
+                    }
                     selectedPosition = myViewHolder.getAdapterPosition();
+                    Log.d(TAG, "myViewHolder.getAdapterPosition(): "+myViewHolder.getAdapterPosition());
+
+
+
                 } else {
                     SingletonProduct.getInstance().setBuy_type(0);
                     SingletonProduct.getInstance().setProducts(null);
+
+
 
                 }
             }
@@ -156,19 +174,26 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
                     myViewHolder.cb_price_two.setChecked(false);
                     SingletonProduct.getInstance().setBuy_type(3);
                     SingletonProduct.getInstance().setProducts(current);
+                    Log.d(TAG, "selectedPosition: "+selectedPosition);
+                    if(selectedPosition!=myViewHolder.getAdapterPosition()&&selectedPosition!=-1){
+                        notifyItemChanged(selectedPosition,null);
+                    }
                     selectedPosition = myViewHolder.getAdapterPosition();
+                    Log.d(TAG, "myViewHolder.getAdapterPosition(): "+myViewHolder.getAdapterPosition());
+
+
+
 
                 } else {
                     SingletonProduct.getInstance().setBuy_type(0);
                     SingletonProduct.getInstance().setProducts(null);
 
+
                 }
             }
         });
 
-
-
-        Log.d(TAG, "onBindViewHolder: " + selectedPosition + "-" + i);
+        Log.d(TAG, "onBindViewHolder: "+ i);
 
     }
 
